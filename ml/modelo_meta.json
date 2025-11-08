@@ -1,0 +1,32 @@
+{
+  "best_params_cv": {
+    "xgb__subsample": 0.7,
+    "xgb__reg_lambda": 10,
+    "xgb__reg_alpha": 0.5,
+    "xgb__n_estimators": 1200,
+    "xgb__min_child_weight": 2,
+    "xgb__max_depth": 5,
+    "xgb__learning_rate": 0.007,
+    "xgb__gamma": 1,
+    "xgb__colsample_bytree": 0.6
+  },
+  "best_score_cv_ap": 0.9630742344196482,
+  "threshold_usado": 0.5980177283287048,
+  "precision": 0.9436619718309859,
+  "recall": 0.9839786381842457,
+  "f1": 0.9633986878126448,
+  "roc_auc": 0.993373979531799,
+  "pr_auc": 0.9851157725225655,
+  "criterio_threshold": "Recall \u2265 0.7 y Precision \u2265 0.15 (mejor F1)",
+  "confusion_matrix": [
+    [
+      1465,
+      44
+    ],
+    [
+      12,
+      737
+    ]
+  ],
+  "version": "final"
+}
