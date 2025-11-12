@@ -1,4 +1,7 @@
 # main.py
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 import json
@@ -60,6 +63,20 @@ def predict(data: UserData):
 
 # === 5. Endpoint de explicación ===
 
+def limpiar_numpy(obj):
+    if isinstance(obj, dict):
+        return {k: limpiar_numpy(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [limpiar_numpy(v) for v in obj]
+    elif isinstance(obj, (np.float32, np.float64)):
+        return float(obj)
+    elif isinstance(obj, (np.int32, np.int64)):
+        return int(obj)
+    else:
+        return obj
+
+
+
 @app.post("/explain")
 def explain(data: UserData):
     try:
@@ -68,8 +85,9 @@ def explain(data: UserData):
             feature_order=feature_order,
             threshold=threshold,
             input_dict=data.dict(),
-            min_pct=10  # umbral de porcentaje para considerar "influyente"
+            min_pct=10
         )
-        return resultado
+        # ✅ Limpieza y serialización segura
+        return JSONResponse(content=jsonable_encoder(limpiar_numpy(resultado)))
     except Exception as e:
-        return {"error": str(e)}
+        return JSONResponse(content={"error": str(e)}, status_code=500)
