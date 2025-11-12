@@ -59,39 +59,17 @@ def predict(data: UserData):
     return {"prediccion": pred, "probabilidad": round(proba, 4)}
 
 # === 5. Endpoint de explicación ===
+
 @app.post("/explain")
 def explain(data: UserData):
     try:
-        # Construir DataFrame con el orden correcto
-        df = pd.DataFrame([data.dict()])[feature_order]
-
-        # Predicción y probabilidad
-        proba = float(model.predict_proba(df)[:, 1][0])
-        pred = int(proba >= threshold)
-
-        # SHAP nativo vía XGBoost
-        dmatrix = xgb.DMatrix(df)
-        shap_values = model.get_booster().predict(dmatrix, pred_contribs=True)
-        shap_row = shap_values[0, :-1]  # última columna es el bias
-
-        # Seleccionar top 3 variables más influyentes
-        top_idx = np.argsort(np.abs(shap_row))[::-1][:3]
-        explicacion = []
-        for i in top_idx:
-            var = feature_order[i]
-            impacto = float(shap_row[i])
-            direccion = "aumenta el riesgo" if impacto > 0 else "reduce el riesgo"
-            explicacion.append({
-                "variable": str(var),
-                "impacto": round(abs(impacto), 4),
-                "direccion": direccion
-            })
-
-        # Respuesta JSON‑friendly
-        return {
-            "prediccion": pred,
-            "probabilidad": round(proba, 4),
-            "explicacion": explicacion
-        }
+        resultado = explain_prediction(
+            model=model,
+            feature_order=feature_order,
+            threshold=threshold,
+            input_dict=data.dict(),
+            min_pct=10  # umbral de porcentaje para considerar "influyente"
+        )
+        return resultado
     except Exception as e:
         return {"error": str(e)}
